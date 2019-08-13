@@ -2,13 +2,14 @@
 
 ## Goals
 
-- ✓ custom pattern per method
-- ✓ custom variables in pattern
-- ✓ custom level threshold per method
-- ✓ separate log file per method
-- ability to change it all in runtime
+- ✓ Custom pattern per method
+- ✓ Custom variables in pattern
+- ✓ Custom level threshold per method
+- ✓ Separate log file per method
+- Ability to change it all in runtime
 - ✓ Java config
+- Threads
 
 ## Tips
 
-- keep all custom classes public!
+- Keep all custom classes public!

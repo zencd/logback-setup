@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Appender automatically dispatching logging to its children appenders created on demand.
+ * Automatically dispatches logging to a number of children appenders created on demand.
+ * Acts much like {@link ch.qos.logback.classic.sift.SiftingAppender}.
  */
 public class MultiAppender extends AppenderBase<ILoggingEvent> {
 
@@ -17,8 +18,10 @@ public class MultiAppender extends AppenderBase<ILoggingEvent> {
 
     private final Appender<ILoggingEvent> defaultAppender;
     private final Function<String, Appender<ILoggingEvent>> createAppender;
+    private final RuntimeLogging logging;
 
-    public MultiAppender(Function<String, Appender<ILoggingEvent>> createAppender, Appender<ILoggingEvent> defaultAppender) {
+    public MultiAppender(RuntimeLogging logging, Function<String, Appender<ILoggingEvent>> createAppender, Appender<ILoggingEvent> defaultAppender) {
+        this.logging = logging;
         this.createAppender = createAppender;
         this.defaultAppender = defaultAppender;
     }
@@ -29,8 +32,10 @@ public class MultiAppender extends AppenderBase<ILoggingEvent> {
         if (mdc != null) {
             String method = mdc.get(RuntimeLogging.MDC_KEY_METHOD);
             if (method != null) {
-                Appender<ILoggingEvent> appender = getOrCreateAppender(method);
-                appender.doAppend(event);
+                if (logging.filterEventByMethod(event, method)) {
+                    Appender<ILoggingEvent> appender = getOrCreateAppender(method);
+                    appender.doAppend(event);
+                }
             } else {
                 defaultAppender.doAppend(event);
             }
@@ -42,8 +47,13 @@ public class MultiAppender extends AppenderBase<ILoggingEvent> {
     private Appender<ILoggingEvent> getOrCreateAppender(String method) {
         Appender<ILoggingEvent> appender = appenderByMethod.get(method);
         if (appender == null) {
-            appender = createAppender.apply(method);
-            appenderByMethod.put(method, appender);
+            synchronized (appenderByMethod) {
+                appender = appenderByMethod.get(method);
+                if (appender == null) {
+                    appender = createAppender.apply(method);
+                    appenderByMethod.put(method, appender);
+                }
+            }
         }
         return appender;
     }
