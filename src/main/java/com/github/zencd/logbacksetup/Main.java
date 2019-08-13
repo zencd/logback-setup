@@ -19,12 +19,12 @@ public class Main {
     public static void main(String[] args) throws Exception {
         log.info("===== program started; no method in context yet =====");
 
-        CustomLogging.configureMethodsOneWay();
+        CustomLogging.readConfig1();
         CustomLogging.reconfigure();
         method1();
         method2();
 
-        CustomLogging.configureMethodsAnotherWay();
+        CustomLogging.readConfig2();
         CustomLogging.reconfigure();
         method1();
         method2();

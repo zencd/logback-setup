@@ -17,6 +17,9 @@ import org.slf4j.MDC;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Logging configurator.
+ */
 public class CustomLogging {
 
     private final Map<String, Level> levelByMethod = new HashMap<>();
@@ -46,7 +49,7 @@ public class CustomLogging {
         INSTANCE.configureLogback();
     }
 
-    public static void configureMethodsOneWay() {
+    static void readConfig1() {
         INSTANCE.levelByMethod.clear();
         INSTANCE.logFileByMethod.clear();
         INSTANCE.patternByMethod.clear();
@@ -64,7 +67,7 @@ public class CustomLogging {
         }
     }
 
-    public static void configureMethodsAnotherWay() {
+    static void readConfig2() {
         INSTANCE.levelByMethod.clear();
         INSTANCE.logFileByMethod.clear();
         INSTANCE.patternByMethod.clear();
@@ -82,16 +85,9 @@ public class CustomLogging {
         }
     }
 
-    public static void setCurrentMethod(String methodName) {
-        MDC.put(MDC_KEY_METHOD, methodName);
-    }
-
-    public static void unsetCurrentMethod() {
-        MDC.remove(MDC_KEY_METHOD);
-    }
-
     private void configureLogback() {
-        clearCachesEtc();
+        // clear the things introduced by this class
+        encoderByPattern.clear();
 
         Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext lc = rootLogger.getLoggerContext();
@@ -113,10 +109,6 @@ public class CustomLogging {
 
         rootLogger.addAppender(multiAppender);
         //rootLogger.addAppender();
-    }
-
-    private void clearCachesEtc() {
-        encoderByPattern.clear();
     }
 
     private void configurePatterns(LoggerContext lc) {
@@ -167,4 +159,13 @@ public class CustomLogging {
         }
         return encoder;
     }
+
+    static void setCurrentMethod(String methodName) {
+        MDC.put(MDC_KEY_METHOD, methodName);
+    }
+
+    static void unsetCurrentMethod() {
+        MDC.remove(MDC_KEY_METHOD);
+    }
+
 }
