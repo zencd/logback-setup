@@ -1,8 +1,8 @@
 # Per-method logging with logback
 
-A principal example showing how to setup <a href="https://logback.qos.ch/manual/index.html">logback</a> to log each method to separate file.
+A principal example showing how to setup [logback](https://logback.qos.ch/manual/index.html) to log each method to separate file.
 
-MT-safety not guaranteed. Java 1.8+.
+MT-safety and extra efficiency not guaranteed. Java 1.8+. Written by zencd, Aug 2019.
 
 ## Goals
 
@@ -10,10 +10,9 @@ MT-safety not guaranteed. Java 1.8+.
 - ✓ Custom pattern per method
 - ✓ Custom level threshold per method
 - ✓ Custom variables in pattern
-- ✓ Ability to change it all in runtime
+- ✓ Applicable to thread workers
+- ✓ Reconfigurable in runtime
 - ✓ Pure Java config
-- ✓ Application of the config to thread worker
-
 
 ## Run
 
