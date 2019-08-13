@@ -6,8 +6,12 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.encoder.Encoder;
+import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.action.Action;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
@@ -22,11 +26,17 @@ public class RuntimeLogging {
 
     static Action BASE_CLASS_FOR_XML_CONFIGURATORS;
 
-    private final Map<String, Level> levelByMethod = new HashMap<>();
-    {
-        levelByMethod.put("someMethod", Level.INFO);
-        levelByMethod.put("anotherMethod", Level.ERROR);
-    }
+    private final Map<String, Level> levelByMethod = new HashMap<>() {{
+        put("someMethod", Level.INFO);
+        put("anotherMethod", Level.ERROR);
+    }};
+
+    private final Map<String, String> logFileByMethod = new HashMap<>() {{
+        put("someMethod", "method1.log");
+        put("anotherMethod", "method2.log");
+    }};
+
+    private final String logFileNameNoMethod = "default.log";
 
     public static final String MDC_KEY_METHOD = "method";
 
@@ -55,8 +65,10 @@ public class RuntimeLogging {
         encoder.setPattern("%-5level %met { %thread }: %message%n");
         encoder.start();
 
-        MyFilter filter = new MyFilter();
+        MyFilter filter = new MyFilter(this);
         filter.start();
+
+        List<MyFilter> allFilters = List.of(filter);
 
         ConsoleAppender<ILoggingEvent> defaultAppender = new ConsoleAppender<ILoggingEvent>();
         defaultAppender.setContext(lc);
@@ -64,7 +76,7 @@ public class RuntimeLogging {
         defaultAppender.addFilter(filter);
         defaultAppender.start();
 
-        MyAppender discriminatingAppender = new MyAppender(lc, encoder, List.of(filter), defaultAppender);
+        MyAppender discriminatingAppender = new MyAppender((method) -> createAppender(lc, encoder, allFilters, method), defaultAppender);
         discriminatingAppender.start();
 
         rootLogger.addAppender(discriminatingAppender);
@@ -99,7 +111,7 @@ public class RuntimeLogging {
         //root.setLevel(Level.INFO); // override level in XML
     }
 
-    public FilterReply filterEvent(ILoggingEvent event) {
+    FilterReply filterEvent(ILoggingEvent event) {
         String method = event.getMDCPropertyMap().get(MDC_KEY_METHOD);
         if (method != null) {
             Level minLevel = levelByMethod.get(method);
@@ -110,5 +122,18 @@ public class RuntimeLogging {
             }
         }
         return FilterReply.NEUTRAL;
+    }
+
+    private Appender<ILoggingEvent> createAppender(LoggerContext lc, Encoder<ILoggingEvent> encoder, List<MyFilter> filters, String methodName) {
+        FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
+        appender.setContext(lc);
+        appender.setAppend(false);
+        appender.setEncoder(encoder);
+        appender.setFile(logFileByMethod.getOrDefault(methodName, logFileNameNoMethod));
+        for (Filter<ILoggingEvent> filter : filters) {
+            appender.addFilter(filter);
+        }
+        appender.start();
+        return appender;
     }
 }
