@@ -12,6 +12,7 @@ import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.encoder.Encoder;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class RuntimeLogging {
 
     private final String LOG_FILE_NAME_NO_METHOD = "default.log";
 
-    private static final String DEFAULT_PATTERN = "%-5level %met { %thread }: %message%n";
+    private static final String DEFAULT_PATTERN = "%d %-5level %message <-- default pattern %n";
 
     static final String MDC_KEY_METHOD = "CURRENT_METHOD_NAME";
 
@@ -79,6 +80,14 @@ public class RuntimeLogging {
             INSTANCE.logFileByMethod.put(methodName, "method2x.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN2x --x_X-- %-3level %message%n");
         }
+    }
+
+    public static void setCurrentMethod(String methodName) {
+        MDC.put(MDC_KEY_METHOD, methodName);
+    }
+
+    public static void unsetCurrentMethod() {
+        MDC.remove(MDC_KEY_METHOD);
     }
 
     private void configureLogback() {
