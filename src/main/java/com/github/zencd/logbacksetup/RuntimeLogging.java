@@ -15,6 +15,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RuntimeLogging {
@@ -57,13 +58,17 @@ public class RuntimeLogging {
         MyFilter filter = new MyFilter();
         filter.start();
 
-        ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<ILoggingEvent>();
-        appender.setContext(lc);
-        appender.setEncoder(encoder);
-        appender.addFilter(filter);
-        appender.start();
+        ConsoleAppender<ILoggingEvent> defaultAppender = new ConsoleAppender<ILoggingEvent>();
+        defaultAppender.setContext(lc);
+        defaultAppender.setEncoder(encoder);
+        defaultAppender.addFilter(filter);
+        defaultAppender.start();
 
-        rootLogger.addAppender(appender);
+        MyAppender discriminatingAppender = new MyAppender(lc, encoder, List.of(filter), defaultAppender);
+        discriminatingAppender.start();
+
+        rootLogger.addAppender(discriminatingAppender);
+        //rootLogger.addAppender(defaultAppender);
     }
 
     private void configureJavaPatternRules(LoggerContext lc) {
