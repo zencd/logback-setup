@@ -1,9 +1,14 @@
 package com.github.zencd.logbacksetup;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.core.joran.action.Action;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.util.StatusPrinter;
@@ -14,10 +19,12 @@ import java.util.Map;
 
 public class RuntimeLogging {
 
+    static Action BASE_CLASS_FOR_XML_CONFIGURATORS;
+
     private final Map<String, Level> levelByMethod = new HashMap<>();
     {
-        levelByMethod.put("method1", Level.INFO);
-        levelByMethod.put("method2", Level.ERROR);
+        levelByMethod.put("someMethod", Level.INFO);
+        levelByMethod.put("anotherMethod", Level.ERROR);
     }
 
     public static final String MDC_KEY_METHOD = "method";
@@ -26,7 +33,44 @@ public class RuntimeLogging {
 
     private RuntimeLogging() {}
 
-    public void configure() throws JoranException {
+    public void configurePureJava() throws JoranException {
+        Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        LoggerContext lc = rootLogger.getLoggerContext();
+        // we are not interested in auto-configuration
+        lc.reset();
+        rootLogger.setLevel(Level.DEBUG);
+
+        configureJavaPatternRules(lc);
+
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+        encoder.setContext(lc);
+        encoder.setPattern("%-5level %met { %thread }: %message%n");
+        encoder.start();
+
+        MyFilter filter = new MyFilter();
+        filter.start();
+
+        ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<ILoggingEvent>();
+        appender.setContext(lc);
+        appender.setEncoder(encoder);
+        appender.addFilter(filter);
+        appender.start();
+
+        rootLogger.addAppender(appender);
+    }
+
+    private void configureJavaPatternRules(LoggerContext lc) {
+        Map<String, String> ruleRegistry = (Map) lc.getObject(CoreConstants.PATTERN_RULE_REGISTRY);
+        //System.out.println("ruleRegistry: " + ruleRegistry);
+        if (ruleRegistry == null) {
+            ruleRegistry = new HashMap<String, String>();
+            lc.putObject(CoreConstants.PATTERN_RULE_REGISTRY, ruleRegistry);
+        }
+        ruleRegistry.put("met", "com.github.zencd.logbacksetup.MethodConverter");
+        //System.out.println("ruleRegistry: " + ruleRegistry);
+    }
+
+    public void configureXmlBased() throws JoranException {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         lc.reset(); //  reset prev config
         JoranConfigurator configurator = new JoranConfigurator();

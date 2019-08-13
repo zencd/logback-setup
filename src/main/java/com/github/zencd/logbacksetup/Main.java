@@ -7,9 +7,10 @@ import org.slf4j.MDC;
 
 public class Main {
     public static void main(String[] args) throws JoranException {
-        RuntimeLogging.INSTANCE.configure();
+        //RuntimeLogging.INSTANCE.configureXmlBased();
+        RuntimeLogging.INSTANCE.configurePureJava();
 
-        MDC.put(RuntimeLogging.MDC_KEY_METHOD, "method1");
+        MDC.put(RuntimeLogging.MDC_KEY_METHOD, "someMethod");
         Logger logger = LoggerFactory.getLogger(Main.class);
         logger.debug("debug message");
         logger.info("info message");
@@ -17,7 +18,7 @@ public class Main {
         logger.error("error message");
         MDC.remove(RuntimeLogging.MDC_KEY_METHOD);
 
-        MDC.put(RuntimeLogging.MDC_KEY_METHOD, "method2");
+        MDC.put(RuntimeLogging.MDC_KEY_METHOD, "anotherMethod");
         logger.debug("debug message 222");
         logger.info("info message 222");
         logger.warn("warn message 222");
