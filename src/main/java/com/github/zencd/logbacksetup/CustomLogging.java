@@ -17,7 +17,7 @@ import org.slf4j.MDC;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RuntimeLogging {
+public class CustomLogging {
 
     private final Map<String, Level> levelByMethod = new HashMap<>();
 
@@ -33,13 +33,13 @@ public class RuntimeLogging {
 
     static final String MDC_KEY_METHOD = "CURRENT_METHOD_NAME";
 
-    private static final Map<String, String> CUSTOM_CONVERTERS = new HashMap<>() {{
+    private static final Map<String, String> CUSTOM_CONVERTERS = new HashMap<String, String>() {{
         put("met", MethodConverter.class.getName());
     }};
 
-    private static final RuntimeLogging INSTANCE = new RuntimeLogging();
+    private static final CustomLogging INSTANCE = new CustomLogging();
 
-    private RuntimeLogging() {
+    private CustomLogging() {
     }
 
     static void reconfigure() {

@@ -6,19 +6,22 @@ import org.slf4j.MDC;
 
 import java.util.Random;
 
+/**
+ * Example's main.
+ */
 public class Main {
     static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         log.info("===== program started; no method in context yet =====");
 
-        RuntimeLogging.configureMethodsOneWay();
-        RuntimeLogging.reconfigure();
+        CustomLogging.configureMethodsOneWay();
+        CustomLogging.reconfigure();
         method1();
         method2();
 
-        RuntimeLogging.configureMethodsAnotherWay();
-        RuntimeLogging.reconfigure();
+        CustomLogging.configureMethodsAnotherWay();
+        CustomLogging.reconfigure();
         method1();
         method2();
 
@@ -27,26 +30,25 @@ public class Main {
 
     static void method1() {
         try {
-            RuntimeLogging.setCurrentMethod("someMethod");
-            MDC.put(RuntimeLogging.MDC_KEY_METHOD, "someMethod");
+            CustomLogging.setCurrentMethod("someMethod");
             log.debug("debug message");
             log.info("info message");
             log.warn("warn message");
             log.error("error message {}", new Random().nextLong());
         } finally {
-            RuntimeLogging.unsetCurrentMethod();
+            CustomLogging.unsetCurrentMethod();
         }
     }
 
     static void method2() {
         try {
-            MDC.put(RuntimeLogging.MDC_KEY_METHOD, "anotherMethod");
+            CustomLogging.setCurrentMethod("anotherMethod");
             log.debug("debug message 222");
             log.info("info message 222");
             log.warn("warn message 222");
             log.error("error message 222 {}", new Random().nextLong());
         } finally {
-            MDC.remove(RuntimeLogging.MDC_KEY_METHOD);
+            CustomLogging.unsetCurrentMethod();
         }
     }
 
