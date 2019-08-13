@@ -11,6 +11,13 @@
             <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
+    <appender name="FILE2" class="ch.qos.logback.core.FileAppender">
+        <file>tests2.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
 <!--
     <logger name="logger1" level="DEBUG">
@@ -21,5 +28,6 @@
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE1"/>
+        <appender-ref ref="FILE2"/>
     </root>
 </configuration>

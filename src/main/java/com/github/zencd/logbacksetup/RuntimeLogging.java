@@ -34,8 +34,8 @@ public class RuntimeLogging {
     private RuntimeLogging() {}
 
     public void configure() throws JoranException {
-        //configurePureJava();
-        configureXmlBased();
+        configurePureJava();
+        //configureXmlBased();
     }
 
     public void configurePureJava() throws JoranException {
@@ -44,6 +44,8 @@ public class RuntimeLogging {
         // we are not interested in auto-configuration
         lc.reset();
         rootLogger.setLevel(Level.DEBUG);
+
+        //rootLogger.getAppender()
 
         configureJavaPatternRules(lc);
 
@@ -82,6 +84,11 @@ public class RuntimeLogging {
         configurator.setContext(lc);
         configurator.doConfigure("logback-config-file.xml");
         StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
+
+        Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        System.out.println("DEBUG: " + rootLogger.getAppender("STDOUT"));
+        System.out.println("FILE1: " + rootLogger.getAppender("FILE1"));
+        System.out.println("FILE2: " + rootLogger.getAppender("FILE2"));
 
         //ch.qos.logback.classic.Logger root = lc.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         //root.setLevel(Level.INFO); // override level in XML
