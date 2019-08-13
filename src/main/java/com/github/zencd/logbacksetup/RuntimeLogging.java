@@ -39,29 +39,51 @@ public class RuntimeLogging {
     private static final RuntimeLogging INSTANCE = new RuntimeLogging();
 
     private RuntimeLogging() {
-        configureAbstractMethods();
     }
 
-    static void forceConfigure() {
+    static void reconfigure() {
         INSTANCE.configureLogback();
     }
 
-    private void configureAbstractMethods() {
+    public static void configureMethodsOneWay() {
+        INSTANCE.levelByMethod.clear();
+        INSTANCE.logFileByMethod.clear();
+        INSTANCE.patternByMethod.clear();
         {
             String methodName = "someMethod";
-            levelByMethod.put(methodName, Level.INFO);
-            logFileByMethod.put(methodName, "method1.log");
-            patternByMethod.put(methodName, "PATTERN1 %-5level %met { %thread }: %message%n");
+            INSTANCE.levelByMethod.put(methodName, Level.INFO);
+            INSTANCE.logFileByMethod.put(methodName, "method1.log");
+            INSTANCE.patternByMethod.put(methodName, "PATTERN1 %-5level %met { %thread }: %message%n");
         }
         {
             String methodName = "anotherMethod";
-            levelByMethod.put(methodName, Level.ERROR);
-            logFileByMethod.put(methodName, "method2.log");
-            patternByMethod.put(methodName, "PATTERN2 --x_X-- %-5level { %thread }: %message%n");
+            INSTANCE.levelByMethod.put(methodName, Level.ERROR);
+            INSTANCE.logFileByMethod.put(methodName, "method2.log");
+            INSTANCE.patternByMethod.put(methodName, "PATTERN2 --x_X-- %-5level { %thread }: %message%n");
+        }
+    }
+
+    public static void configureMethodsAnotherWay() {
+        INSTANCE.levelByMethod.clear();
+        INSTANCE.logFileByMethod.clear();
+        INSTANCE.patternByMethod.clear();
+        {
+            String methodName = "someMethod";
+            INSTANCE.levelByMethod.put(methodName, Level.INFO);
+            INSTANCE.logFileByMethod.put(methodName, "method1x.log");
+            INSTANCE.patternByMethod.put(methodName, "PATTERN1x %-5level %met: %message%n");
+        }
+        {
+            String methodName = "anotherMethod";
+            INSTANCE.levelByMethod.put(methodName, Level.WARN);
+            INSTANCE.logFileByMethod.put(methodName, "method2x.log");
+            INSTANCE.patternByMethod.put(methodName, "PATTERN2x --x_X-- %-3level %message%n");
         }
     }
 
     private void configureLogback() {
+        clearCachesEtc();
+
         Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext lc = rootLogger.getLoggerContext();
         lc.reset(); // reconfigure
@@ -82,6 +104,10 @@ public class RuntimeLogging {
 
         rootLogger.addAppender(multiAppender);
         //rootLogger.addAppender();
+    }
+
+    private void clearCachesEtc() {
+        encoderByPattern.clear();
     }
 
     private void configurePatterns(LoggerContext lc) {

@@ -4,15 +4,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
-        RuntimeLogging.forceConfigure(); // force loading of class RuntimeLogging
+    public static void main(String[] args) throws InterruptedException {
         log.info("===== program started; no method in context yet =====");
+
+        RuntimeLogging.configureMethodsOneWay();
+        RuntimeLogging.reconfigure();
+        method1();
+        method2();
+
+        RuntimeLogging.configureMethodsAnotherWay();
+        RuntimeLogging.reconfigure();
         method1();
         method2();
     }
