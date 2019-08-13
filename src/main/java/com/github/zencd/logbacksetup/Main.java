@@ -11,7 +11,7 @@ public class Main {
     static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        RuntimeLogging.INSTANCE.configure();
+        RuntimeLogging.forceConfigure(); // force loading of class RuntimeLogging
         log.info("===== program started; no method in context yet =====");
         method1();
         method2();

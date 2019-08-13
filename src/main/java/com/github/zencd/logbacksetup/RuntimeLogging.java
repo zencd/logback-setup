@@ -30,16 +30,23 @@ public class RuntimeLogging {
 
     private static final String DEFAULT_PATTERN = "%-5level %met { %thread }: %message%n";
 
-    static final String MDC_KEY_METHOD = "method";
+    static final String MDC_KEY_METHOD = "CURRENT_METHOD_NAME";
 
     private static final Map<String, String> CUSTOM_CONVERTERS = new HashMap<>() {{
         put("met", MethodConverter.class.getName());
     }};
 
-    @Deprecated
-    public static final RuntimeLogging INSTANCE = new RuntimeLogging();
+    private static final RuntimeLogging INSTANCE = new RuntimeLogging();
 
     private RuntimeLogging() {
+        configureAbstractMethods();
+    }
+
+    static void forceConfigure() {
+        INSTANCE.configureLogback();
+    }
+
+    private void configureAbstractMethods() {
         {
             String methodName = "someMethod";
             levelByMethod.put(methodName, Level.INFO);
@@ -50,11 +57,11 @@ public class RuntimeLogging {
             String methodName = "anotherMethod";
             levelByMethod.put(methodName, Level.ERROR);
             logFileByMethod.put(methodName, "method2.log");
-            patternByMethod.put(methodName, "PATTERN2 --x_X-- %-5level %met { %thread }: %message%n");
+            patternByMethod.put(methodName, "PATTERN2 --x_X-- %-5level { %thread }: %message%n");
         }
     }
 
-    void configure() {
+    private void configureLogback() {
         Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext lc = rootLogger.getLoggerContext();
         lc.reset(); // reconfigure
@@ -70,7 +77,7 @@ public class RuntimeLogging {
             defaultAppender.start();
         }
 
-        MultiAppender multiAppender = new MultiAppender(this, (method) -> createAppender(lc, method), defaultAppender);
+        MultiAppender multiAppender = new MultiAppender(this, (method) -> createFileAppender(lc, method), defaultAppender);
         multiAppender.start();
 
         rootLogger.addAppender(multiAppender);
@@ -94,7 +101,7 @@ public class RuntimeLogging {
         return true;
     }
 
-    private Appender<ILoggingEvent> createAppender(LoggerContext lc, String methodName) {
+    private Appender<ILoggingEvent> createFileAppender(LoggerContext lc, String methodName) {
         FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
         appender.setContext(lc);
         appender.setAppend(false);
