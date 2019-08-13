@@ -17,4 +17,6 @@ MT-safety not guaranteed. Java 1.8+.
 
 ## Run
 
-Run `Main.java`. Files `method1.log`, `method1x.log`, `method2.log` and `method2x.log` must appear in the current directory.
+Run `Main.java`.
+
+Expect files `method1.log`, `method1x.log`, `method2.log` and `method2x.log` in the current directory.
