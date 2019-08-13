@@ -1,7 +1,10 @@
 <configuration>
+    <conversionRule conversionWord="met"
+                    converterClass="com.github.zencd.logbacksetup.MethodConverter" />
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="com.github.zencd.logbacksetup.MyFilter" />
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="MdcLayout" />
+            <layout class="com.github.zencd.logbacksetup.RuntimeLayout" />
         </encoder>
     </appender>
     <root level="DEBUG">
