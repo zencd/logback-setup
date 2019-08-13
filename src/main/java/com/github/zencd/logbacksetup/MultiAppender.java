@@ -8,14 +8,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class MyAppender extends AppenderBase<ILoggingEvent> {
+/**
+ * Appender automatically dispatching logging to its children appenders created on demand.
+ */
+public class MultiAppender extends AppenderBase<ILoggingEvent> {
 
     private final Map<String, Appender<ILoggingEvent>> appenderByMethod = new HashMap<>();
 
     private final Appender<ILoggingEvent> defaultAppender;
     private final Function<String, Appender<ILoggingEvent>> createAppender;
 
-    public MyAppender(Function<String, Appender<ILoggingEvent>> createAppender, Appender<ILoggingEvent> defaultAppender) {
+    public MultiAppender(Function<String, Appender<ILoggingEvent>> createAppender, Appender<ILoggingEvent> defaultAppender) {
         this.createAppender = createAppender;
         this.defaultAppender = defaultAppender;
     }

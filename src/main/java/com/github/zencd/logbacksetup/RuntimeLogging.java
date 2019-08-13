@@ -26,15 +26,9 @@ public class RuntimeLogging {
 
     static Action BASE_CLASS_FOR_XML_CONFIGURATORS;
 
-    private final Map<String, Level> levelByMethod = new HashMap<>() {{
-        put("someMethod", Level.INFO);
-        put("anotherMethod", Level.ERROR);
-    }};
+    private final Map<String, Level> levelByMethod = new HashMap<>();
 
-    private final Map<String, String> logFileByMethod = new HashMap<>() {{
-        put("someMethod", "method1.log");
-        put("anotherMethod", "method2.log");
-    }};
+    private final Map<String, String> logFileByMethod = new HashMap<>();
 
     private final String logFileNameNoMethod = "default.log";
 
@@ -42,7 +36,18 @@ public class RuntimeLogging {
 
     public static final RuntimeLogging INSTANCE = new RuntimeLogging();
 
-    private RuntimeLogging() {}
+    private RuntimeLogging() {
+        {
+            String methodName = "someMethod";
+            levelByMethod.put(methodName, Level.INFO);
+            logFileByMethod.put(methodName, "method1.log");
+        }
+        {
+            String methodName = "anotherMethod";
+            levelByMethod.put(methodName, Level.INFO);
+            logFileByMethod.put(methodName, "method2.log");
+        }
+    }
 
     public void configure() throws JoranException {
         configurePureJava();
@@ -76,7 +81,7 @@ public class RuntimeLogging {
         defaultAppender.addFilter(filter);
         defaultAppender.start();
 
-        MyAppender discriminatingAppender = new MyAppender((method) -> createAppender(lc, encoder, allFilters, method), defaultAppender);
+        MultiAppender discriminatingAppender = new MultiAppender((method) -> createAppender(lc, encoder, allFilters, method), defaultAppender);
         discriminatingAppender.start();
 
         rootLogger.addAppender(discriminatingAppender);
