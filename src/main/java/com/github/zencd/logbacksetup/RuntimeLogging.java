@@ -33,6 +33,11 @@ public class RuntimeLogging {
 
     private RuntimeLogging() {}
 
+    public void configure() throws JoranException {
+        //configurePureJava();
+        configureXmlBased();
+    }
+
     public void configurePureJava() throws JoranException {
         Logger rootLogger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext lc = rootLogger.getLoggerContext();
@@ -75,7 +80,7 @@ public class RuntimeLogging {
         lc.reset(); //  reset prev config
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
-        configurator.doConfigure("logback-config-01.xml");
+        configurator.doConfigure("logback-config-file.xml");
         StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
 
         //ch.qos.logback.classic.Logger root = lc.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
