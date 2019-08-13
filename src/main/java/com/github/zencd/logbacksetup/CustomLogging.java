@@ -70,7 +70,7 @@ public class CustomLogging {
         INSTANCE.patternByMethod.clear();
         {
             String methodName = "someMethod";
-            INSTANCE.levelByMethod.put(methodName, Level.INFO);
+            INSTANCE.levelByMethod.put(methodName, Level.DEBUG);
             INSTANCE.logFileByMethod.put(methodName, "method1x.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN1x %-5level %met: %message%n");
         }
