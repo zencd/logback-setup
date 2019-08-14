@@ -21,48 +21,55 @@ public class Main {
 
         CustomLogging.readConfig1();
         CustomLogging.reconfigure();
-        method1();
-        method2();
+        callMethod("method1", Main::method1);
+        //callMethod("method2", Main::method2);
 
         CustomLogging.readConfig2();
         CustomLogging.reconfigure();
-        method1();
-        method2();
+        callMethod("method1", Main::method1);
+        //callMethod("method2", Main::method2);
+    }
+
+    private static void callMethod(String methodName, Runnable runnable) {
+        try {
+            CustomLogging.startMethod(methodName);
+            runnable.run();
+        } finally {
+            CustomLogging.endMethod();
+        }
     }
 
     static void method1() {
-        try {
-            CustomLogging.setCurrentMethod("someMethod");
-            log.debug("debug message");
-            log.info("info message");
-            log.warn("warn message");
-            log.error("error message {}", new Random().nextLong());
-        } finally {
-            CustomLogging.unsetCurrentMethod();
-        }
+        log.debug("M1: debug message");
+        log.info("M1: info message");
+        log.warn("M1: warn message");
+        log.error("M1: error message {}", new Random().nextLong());
+
+        callMethod("method2", Main::method2);
+
+        log.error("M1: control returned");
     }
 
-    static void method2() throws Exception {
-        try {
-            CustomLogging.setCurrentMethod("anotherMethod");
-            log.debug("debug message 222");
-            log.info("info message 222");
-            log.warn("warn message 222");
-            log.error("error message 222 {}", new Random().nextLong());
+    static void method2() {
+        log.debug("M2: debug message 222");
+        log.info("M2: info message 222");
+        log.warn("M2: warn message 222");
+        log.error("M2: error message 222 {}", new Random().nextLong());
 
-            runThreads();
-        } finally {
-            CustomLogging.unsetCurrentMethod();
-        }
+        runThreads();
     }
 
-    private static void runThreads() throws Exception {
+    private static void runThreads() {
         final Map<String, String> mdcOrig = MDC.getCopyOfContextMap();
 
         ExecutorService es = Executors.newFixedThreadPool(1);
         es.submit(() -> ThreadWorker.run(mdcOrig));
         es.shutdown();
-        es.awaitTermination(60, TimeUnit.SECONDS);
+        try {
+            es.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     static class ThreadWorker {

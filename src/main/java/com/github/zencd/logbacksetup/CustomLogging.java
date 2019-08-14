@@ -16,6 +16,7 @@ import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Logging configurator.
@@ -42,6 +43,8 @@ public class CustomLogging {
 
     private static final CustomLogging INSTANCE = new CustomLogging();
 
+    private static final ThreadLocal<Stack<String>> callStack = ThreadLocal.withInitial(Stack::new);
+
     private CustomLogging() {
     }
 
@@ -54,13 +57,13 @@ public class CustomLogging {
         INSTANCE.logFileByMethod.clear();
         INSTANCE.patternByMethod.clear();
         {
-            String methodName = "someMethod";
+            String methodName = "method1";
             INSTANCE.levelByMethod.put(methodName, Level.INFO);
             INSTANCE.logFileByMethod.put(methodName, "method1.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN1 %-5level %met { %thread }: %message%n");
         }
         {
-            String methodName = "anotherMethod";
+            String methodName = "method2";
             INSTANCE.levelByMethod.put(methodName, Level.ERROR);
             INSTANCE.logFileByMethod.put(methodName, "method2.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN2 --x_X-- %-5level { %thread }: %message%n");
@@ -72,13 +75,13 @@ public class CustomLogging {
         INSTANCE.logFileByMethod.clear();
         INSTANCE.patternByMethod.clear();
         {
-            String methodName = "someMethod";
+            String methodName = "method1";
             INSTANCE.levelByMethod.put(methodName, Level.DEBUG);
             INSTANCE.logFileByMethod.put(methodName, "method1x.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN1x %-5level %met: %message%n");
         }
         {
-            String methodName = "anotherMethod";
+            String methodName = "method2";
             INSTANCE.levelByMethod.put(methodName, Level.WARN);
             INSTANCE.logFileByMethod.put(methodName, "method2x.log");
             INSTANCE.patternByMethod.put(methodName, "PATTERN2x --x_X-- %-3level %message%n");
@@ -160,12 +163,35 @@ public class CustomLogging {
         return encoder;
     }
 
-    static void setCurrentMethod(String methodName) {
+    /**
+     * Must keep call stack in common case, so using a thread local for that.
+     * @param methodName
+     */
+    static void startMethod(String methodName) {
+        callStack.get().push(methodName);
         MDC.put(MDC_KEY_METHOD, methodName);
     }
 
-    static void unsetCurrentMethod() {
-        MDC.remove(MDC_KEY_METHOD);
+    /**
+     * Must keep call stack in common case, so using a thread local for that.
+     */
+    static void endMethod() {
+        String prevMethod = popCallStackAndPeekMethod();
+        if (prevMethod != null) {
+            MDC.put(MDC_KEY_METHOD, prevMethod);
+        } else {
+            MDC.remove(MDC_KEY_METHOD);
+        }
+    }
+
+    private static String popCallStackAndPeekMethod() {
+        final Stack<String> stack = callStack.get();
+        String prevMethod = null;
+        if (stack.size() > 0) {
+            stack.pop();
+            prevMethod = (stack.size() > 0) ? stack.peek() : null;
+        }
+        return prevMethod;
     }
 
 }
