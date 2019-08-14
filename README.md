@@ -1,6 +1,6 @@
 # Per-method logging with logback
 
-A principal example showing how to setup [logback](https://logback.qos.ch/manual/index.html) to log each Java method to separate file.
+A principal example showing how to setup [logback](https://logback.qos.ch/manual/index.html) to log each Java method to a separate file.
 
 MT-safety and extra efficiency not guaranteed. Java 1.8+. Written by zencd, Aug 2019.
 
