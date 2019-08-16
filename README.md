@@ -4,7 +4,7 @@ A principal example showing how to setup [logback](https://logback.qos.ch/manual
 
 MT-safety and extra efficiency not guaranteed. Java 1.8+. Written by zencd, Aug 2019.
 
-[Article at Habr.com]https://habr.com/ru/post/463601/ (in Russian)
+[Article at Habr.com](https://habr.com/ru/post/463601/) (in Russian)
 
 ## Goals
 
