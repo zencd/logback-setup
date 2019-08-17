@@ -56,6 +56,8 @@ public class Main {
         log.warn("M2: warn message 222");
         log.error("M2: error message 222 {}", new Random().nextLong());
 
+        AnotherClass.run();
+
         runThreads();
     }
 
@@ -77,6 +79,13 @@ public class Main {
         static void run(Map<String, String> parentMdc) {
             MDC.setContextMap(parentMdc);
             log.error("a message from thread worker, expected to appear in `method2*.log` {}", new Random().nextDouble());
+        }
+    }
+
+    static class AnotherClass {
+        static final Logger log = LoggerFactory.getLogger(AnotherClass.class);
+        static void run() {
+            log.error("expected to appear in method2*.log");
         }
     }
 }
