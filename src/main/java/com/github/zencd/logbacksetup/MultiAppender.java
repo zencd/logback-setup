@@ -45,6 +45,26 @@ public class MultiAppender extends AppenderBase<ILoggingEvent> {
         }
     }
 
+    @Override
+    public void start() {
+        super.start();
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        stopAppenders();
+    }
+
+    private void stopAppenders() {
+        // `defaultAppender` seems should not be stopped here
+        appenderByMethod.values().forEach((appender) -> {
+            if (appender.isStarted()) {
+                appender.stop();
+            }
+        });
+    }
+
     private Appender<ILoggingEvent> getOrCreateAppender(String method) {
         Appender<ILoggingEvent> appender = appenderByMethod.get(method);
         if (appender == null) {
